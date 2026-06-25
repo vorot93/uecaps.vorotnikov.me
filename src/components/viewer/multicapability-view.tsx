@@ -9,6 +9,9 @@ import type { Capabilities } from '~/parser/types/uecapabilityparser';
 import CapabilityView from '~/components/viewer/capability-view';
 import SelectInput from '~/components/inputs/select-input';
 import { logTypeToString } from '~/helpers/metadata';
+import Button from '~/components/inputs/button';
+import { capabilitiesToCsv } from '~/lib/csv';
+import { downloadCsv } from '~/lib/download';
 
 interface Props {
   capabilitiesList: Capabilities[];
@@ -52,19 +55,24 @@ export default component$(({ capabilitiesList, groupDescription }: Props) => {
 
   return (
     <>
-      <div
-        class={
-          'mb-4 flex flex-col ' +
-          (capabilitiesSelector.length < 2 ? 'hidden' : '')
-        }
-      >
-        <div class="mx-auto w-full max-w-7xl">
-          <SelectInput
-            label="Select log"
-            options={capabilitiesSelector}
-            onInput$={async (value) => {
-              const index = Number.parseInt(value);
-              currentIndex.value = index;
+      <div class="mb-4 flex flex-col">
+        <div class="mx-auto flex w-full max-w-7xl items-end gap-4">
+          <div class={'flex-1 ' + (capabilitiesSelector.length < 2 ? 'hidden' : '')}>
+            <SelectInput
+              label="Select log"
+              options={capabilitiesSelector}
+              onInput$={async (value) => {
+                const index = Number.parseInt(value);
+                currentIndex.value = index;
+              }}
+            />
+          </div>
+          <Button
+            type="button"
+            label="Download CSV"
+            onClick$={async () => {
+              const c = currentCapabilities.value;
+              if (c) downloadCsv('ue-capabilities.csv', capabilitiesToCsv(c));
             }}
           />
         </div>

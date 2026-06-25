@@ -87,4 +87,11 @@ describe('MultiCapabilityView render smoke test', () => {
     expect(html).toContain('Filters');
     expect(html).toContain('Generic Capabilities');
   });
+
+  it('renders a Download CSV button in the multi-view', async () => {
+    const caps = interpret(nsgTextToCanonical(readFixtureText('nsgNr.input.txt')));
+    const { screen, render } = await createDOM();
+    await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
+    expect(screen.outerHTML).toContain('Download CSV');
+  });
 });
