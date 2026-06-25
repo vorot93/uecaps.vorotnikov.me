@@ -4,11 +4,13 @@ import type { Capabilities } from "~/parser/types/uecapabilityparser";
 import { parseInput } from "~/lib/parse-input";
 import { loadFromFragmentWithError, writeFragment } from "~/lib/fragment-state";
 import MultiCapabilityView from "~/components/viewer/multicapability-view";
+import WarningsBanner from "~/components/warnings-banner";
 
 export default component$(() => {
   const text = useSignal("");
   const results = useSignal<Capabilities[]>([]);
   const error = useSignal<string | undefined>(undefined);
+  const warnings = useSignal<string[]>([]);
 
   // On client load: read the URL fragment and prefill the textarea + parse.
   // useVisibleTask$ runs ONLY in the browser — never during static prerender,
@@ -34,6 +36,7 @@ export default component$(() => {
       // For a successfully decoded fragment we show parse errors if any,
       // but the textarea is already prefilled so the user can edit and retry.
       error.value = parsed.error;
+      warnings.value = parsed.warnings ?? [];
     }
   });
 
@@ -64,6 +67,8 @@ export default component$(() => {
           </div>
         )}
 
+        <WarningsBanner warnings={warnings.value} />
+
         <button
           type="button"
           class="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -71,6 +76,7 @@ export default component$(() => {
             const parsed = parseInput(text.value);
             results.value = parsed.caps;
             error.value = parsed.error;
+            warnings.value = parsed.warnings ?? [];
             // Update the URL fragment so this page state is shareable.
             // writeFragment uses history.replaceState — client-only; safe here
             // because onClick$ always runs in the browser.

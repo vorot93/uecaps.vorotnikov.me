@@ -14,6 +14,7 @@ import MultiCapabilityView from '../../src/components/viewer/multicapability-vie
 import { interpret } from '../../src/parser/interpret';
 import { nsgTextToCanonical } from '../../src/parser/canonical';
 import { readFixtureText } from '../parser/harness';
+import WarningsBanner from '../../src/components/warnings-banner';
 
 describe('MultiCapabilityView render smoke test', () => {
   it('renders NR band 41 with band-specific CSS class from the nsgNr fixture', async () => {
@@ -93,5 +94,19 @@ describe('MultiCapabilityView render smoke test', () => {
     const { screen, render } = await createDOM();
     await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
     expect(screen.outerHTML).toContain('Download CSV');
+  });
+});
+
+describe('WarningsBanner component', () => {
+  it('renders a yellow role="status" banner listing the warnings', async () => {
+    const { screen, render } = await createDOM();
+    await render(h(WarningsBanner, { warnings: ['Skipped unsupported capability: GERAN (CS)'] }));
+    expect(screen.outerHTML).toContain('role="status"');
+    expect(screen.outerHTML).toContain('Skipped unsupported capability: GERAN (CS)');
+  });
+  it('renders nothing when there are no warnings', async () => {
+    const { screen, render } = await createDOM();
+    await render(h(WarningsBanner, { warnings: [] }));
+    expect(screen.outerHTML).not.toContain('role="status"');
   });
 });

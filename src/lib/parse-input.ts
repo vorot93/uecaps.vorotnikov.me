@@ -1,5 +1,5 @@
 import type { Capabilities } from '~/parser/types/uecapabilityparser';
-import { nsgTextToCanonical } from '~/parser/canonical';
+import { nsgTextToCanonical, unsupportedRatTypes } from '~/parser/canonical';
 import { interpret } from '~/parser/interpret';
 
 /**
@@ -11,10 +11,27 @@ import { interpret } from '~/parser/interpret';
 export interface ParseResult {
   caps: Capabilities[];
   error?: string;
+  warnings?: string[];
 }
 
 /** Guard limit: reject inputs larger than 8 M code units before feeding the parser. */
 const MAX_INPUT_CHARS = 8_000_000;
+
+const RAT_LABELS: Record<string, string> = {
+  utra: 'UTRA',
+  'geran-cs': 'GERAN (CS)',
+  'geran-ps': 'GERAN (PS)',
+  'cdma2000-1xrtt': 'CDMA2000 1xRTT',
+};
+
+function warningsFor(text: string): string[] {
+  const out: string[] = [];
+  for (const rat of unsupportedRatTypes(text)) {
+    const label = RAT_LABELS[rat];
+    if (label !== undefined) out.push(`Skipped unsupported capability: ${label}`);
+  }
+  return out;
+}
 
 /**
  * Parse pasted NSG UE-capability text into a typed ParseResult.
@@ -74,5 +91,6 @@ export function parseInput(text: string): ParseResult {
     };
   }
 
-  return { caps: [caps] };
+  const warnings = warningsFor(t);
+  return warnings.length > 0 ? { caps: [caps], warnings } : { caps: [caps] };
 }

@@ -1,4 +1,4 @@
-import type { TreeNode } from './tokenize';
+import { buildTree, type TreeNode } from './tokenize';
 import { typeValue } from './value';
 
 const ARRAY_MARKER = /\[\d+\]$/;
@@ -76,12 +76,45 @@ export function ratContainers(root: TreeNode): Array<{ rat: string; container: T
   const found: Array<{ rat: string; container: TreeNode }> = [];
   for (const node of walk(root)) {
     const siblings = node.children;
-    for (const ratType of siblings) {
+    for (let i = 0; i < siblings.length; i++) {
+      const ratType = siblings[i]!;
       if (ratType.key !== 'rat-Type' || ratType.value === undefined) continue;
       if (!RAT_VALUES.has(ratType.value)) continue;
-      const container = siblings.find((s) => RAT_CONTAINER.test(s.key));
+      // Find the ueCapabilityRAT-Container that immediately follows this rat-Type
+      // among siblings (not the first one in the list) so each rat-Type is paired
+      // with its own container even when multiple pairs share a parent.
+      const container = siblings.slice(i + 1).find((s) => RAT_CONTAINER.test(s.key));
       if (container) found.push({ rat: ratType.value, container });
     }
   }
   return found;
+}
+
+/**
+ * Recognized rat-Type values that have a paired ueCapabilityRAT-Container in
+ * the tree but are NOT supported by this viewer.
+ *
+ * Mirrors the `ratContainers` logic exactly: walks the full tree, and for each
+ * rat-Type node whose value is not in RAT_VALUES, requires a following
+ * ueCapabilityRAT-Container sibling before collecting it.  This prevents false
+ * positives from stray rat-Type leaf nodes that have no container.
+ */
+export function unsupportedRatTypes(text: string): string[] {
+  const seen = new Set<string>();
+  try {
+    const root = buildTree(text);
+    for (const node of walk(root)) {
+      const siblings = node.children;
+      for (let i = 0; i < siblings.length; i++) {
+        const ratType = siblings[i]!;
+        if (ratType.key !== 'rat-Type' || ratType.value === undefined) continue;
+        if (RAT_VALUES.has(ratType.value)) continue;
+        const container = siblings.slice(i + 1).find((s) => RAT_CONTAINER.test(s.key));
+        if (container) seen.add(ratType.value);
+      }
+    }
+  } catch {
+    // non-fatal — return what we have so far
+  }
+  return [...seen];
 }
