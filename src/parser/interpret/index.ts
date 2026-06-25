@@ -1,4 +1,4 @@
-import type { BandLteDetails, BandNrDetails, Capabilities, LogType } from '../types/uecapabilityparser';
+import type { BandLteDetails, BandNrDetails, Capabilities, IUeCapabilityFilter, IRatCapabilities, LogType, Rat } from '../types/uecapabilityparser';
 import { getObject } from '../json';
 import { getLteCategory, getLteBands } from './lte-bands';
 import { getLteCa, updateLteBandsCapabilities } from './lte-ca';
@@ -7,6 +7,8 @@ import { getNrFeatureSet, getLteFeatureSet, getFeatureSetCombinations } from './
 import type { NrFeatureSets, LteFeatureSets } from './nr-features';
 import { getNrCa, updateNrBandsCapabilities } from './nr-ca';
 import { getEnDc } from './endc';
+import { lteCapabilityFilter, nrCapabilityFilter } from './filters';
+import { ratCapabilitiesLte, ratCapabilitiesNr } from './rat-capabilities';
 
 // LogType.N = 'N' (NSG-text log type). The enum is ambient-only (.d.ts), so
 // we use the string literal and cast — the type is still enforced by TypeScript.
@@ -93,6 +95,25 @@ export function interpret(canonical: Record<string, unknown>): Capabilities {
   if (nr) {
     caps.nrBands = [...nrBandsMap.values()].sort((a, b) => a.band - b.band);
   }
+
+  // ---- Phase 2A: UE-capability filters + RAT capabilities ----
+  const ueCapFilters: IUeCapabilityFilter[] = [];
+  const ratCapabilities: IRatCapabilities[] = [];
+
+  if (eutra) {
+    ueCapFilters.push(lteCapabilityFilter(eutra));
+    ratCapabilities.push(ratCapabilitiesLte(eutra));
+  }
+  if (nr) {
+    ueCapFilters.push(nrCapabilityFilter(nr, 'NR' as Rat));
+    ratCapabilities.push(ratCapabilitiesNr(nr));
+  }
+  if (eutraNr) {
+    ueCapFilters.push(nrCapabilityFilter(eutraNr, 'EUTRA_NR' as Rat));
+  }
+
+  if (ueCapFilters.length > 0) caps.ueCapFilters = ueCapFilters;
+  if (ratCapabilities.length > 0) caps.ratCapabilities = ratCapabilities;
 
   return caps;
 }

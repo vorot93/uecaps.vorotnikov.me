@@ -27,6 +27,8 @@ describe('EN-DC combos: nsgMrdc full parity', () => {
       'nrBands',
       'nrca',
       'endc',
+      'ueCapFilters',
+      'ratCapabilities',
     ]);
   });
 });

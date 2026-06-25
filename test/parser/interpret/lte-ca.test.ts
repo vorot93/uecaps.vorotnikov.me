@@ -12,7 +12,7 @@ describe('LTE CA: nsgEutra full LTE parity', () => {
     expectCapsFields(
       normalizeVolatile(caps),
       normalizeVolatile(oracle),
-      ['lteca', 'lteBands', 'lteCategoryDl', 'lteCategoryUl'],
+      ['lteca', 'lteBands', 'lteCategoryDl', 'lteCategoryUl', 'ueCapFilters', 'ratCapabilities'],
     );
   });
 });

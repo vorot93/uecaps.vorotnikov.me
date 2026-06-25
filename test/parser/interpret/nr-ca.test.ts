@@ -23,7 +23,7 @@ describe('NR-CA + nrBands: nsgNr full NR parity', () => {
     expectCapsFields(
       normalizeVolatile(caps),
       normalizeVolatile(oracle),
-      ['nrBands', 'nrca'],
+      ['nrBands', 'nrca', 'ueCapFilters', 'ratCapabilities'],
     );
   });
 });

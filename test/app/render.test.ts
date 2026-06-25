@@ -72,4 +72,19 @@ describe('MultiCapabilityView render smoke test', () => {
     // NR Bands section must still appear
     expect(html).toContain('NR Bands');
   });
+
+  it('renders Filters and Generic Capabilities from real parser output (nsgNr)', async () => {
+    const caps = interpret(nsgTextToCanonical(readFixtureText('nsgNr.input.txt')));
+    // These two sections only render when the respective field is populated
+    // (nsgNr has no lteCategory fallback), so their presence proves the flow.
+    expect(caps.ueCapFilters?.length).toBeGreaterThan(0);
+    expect(caps.ratCapabilities?.length).toBeGreaterThan(0);
+
+    const { screen, render } = await createDOM();
+    await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
+    const html = screen.outerHTML;
+
+    expect(html).toContain('Filters');
+    expect(html).toContain('Generic Capabilities');
+  });
 });

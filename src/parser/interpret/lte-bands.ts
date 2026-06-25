@@ -45,8 +45,9 @@ function isLteSdl(band: number): boolean {
 /**
  * Resolve the versioned extension objects from the eutra root.
  * Mirrors the property assignments in UEEutraCapabilityJson.kt.
+ * Exported so other interpret modules (e.g. filters.ts) can reuse it.
  */
-function resolveVersions(eutra: Record<string, unknown>) {
+export function resolveVersions(eutra: Record<string, unknown>) {
   // eutraCapabilityV9e0:
   //   rootJson.getObjectAtPath("nonCriticalExtension.".repeat(2) +
   //     "lateNonCriticalExtension" + ".nonCriticalExtension".repeat(3))
@@ -118,6 +119,7 @@ function resolveVersions(eutra: Record<string, unknown>) {
     v9e0,
     v1020,
     v1170,
+    v1180,
     v11a0,
     v1250,
     v1260,
