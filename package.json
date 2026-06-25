@@ -1,0 +1,40 @@
+{
+  "name": "uecaps-viewer",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Stateless client-side NSG UE-capability viewer",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "scripts": {
+    "build": "qwik build",
+    "build.client": "vite build",
+    "build.static": "vite build --ssr src/entry.ssr.tsx -c adapters/static/vite.config.ts",
+    "build.types": "tsc --incremental --noEmit",
+    "dev": "vite --mode ssr",
+    "qwik": "qwik",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@qwik-ui/headless": "^0.7.7",
+    "fflate": "^0.8.3",
+    "qwik-feather-icons": "^1.2.1"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "^1.20.0",
+    "@builder.io/qwik-city": "^1.20.0",
+    "@types/node": "^20.0.0",
+    "autoprefixer": "^10.4.21",
+    "ignore": "^7.0.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.4.5",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^4.2.1",
+    "vitest": "^4.1.9"
+  }
+}

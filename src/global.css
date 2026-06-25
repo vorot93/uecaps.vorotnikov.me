@@ -1,0 +1,11 @@
+/**
+ * Global styles for NSG UE-Capability Viewer.
+ * Tailwind base + utilities injected via PostCSS.
+ * Colored-band styles forked from HandyMenny/uecapabilityparser-web (MIT).
+ */
+@import url('styles/custom.css');
+@import url('styles/colored-bands.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
