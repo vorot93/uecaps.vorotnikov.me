@@ -7,3 +7,6 @@ vendored unmodified from HandyMenny/uecapabilityparser
 
 nsgMrdcSplit_0.txt, nsgMrdcSplit_1.txt, nsgMrdcSplit.caps.json — vendored from
 HandyMenny/uecapabilityparser (MIT), src/test/resources/cli/{input,oracleJson}/.
+
+nsgSul.input.txt, nsgSul.caps.json — vendored from HandyMenny/uecapabilityparser (MIT),
+src/test/resources/cli/{input,oracleJson}/.

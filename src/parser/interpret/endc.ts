@@ -42,6 +42,7 @@ import type {
 } from './nr-features';
 import { applyNrFeaturesPerCC } from './nr-ca';
 import type { MutableComponentNr } from './nr-ca';
+import { compareBwClassDesc } from './component-sort';
 
 // ---------------------------------------------------------------------------
 // Ambient-enum shims
@@ -310,19 +311,6 @@ function sortNrDesc(components: MutableNr[]): void {
     if (bwDlDiff !== 0) return bwDlDiff;
     return bwValue(b.maxBwUl) - bwValue(a.maxBwUl);
   });
-}
-
-function bwClassChar(cls: string | undefined): string {
-  // undefined and 'none' both map to NONE == '0' (char 48), which sorts below any letter (A='A', char 65).
-  if (cls === undefined || cls === 'none') return '0';
-  return cls;
-}
-
-function compareBwClassDesc(a: string | undefined, b: string | undefined): number {
-  const av = bwClassChar(a);
-  const bv = bwClassChar(b);
-  if (av === bv) return 0;
-  return av < bv ? -1 : 1;
 }
 
 function sortLteDesc(components: MutableLte[]): void {

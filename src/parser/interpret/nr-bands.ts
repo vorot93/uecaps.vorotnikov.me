@@ -46,6 +46,10 @@ function isFR2(band: number): boolean {
 // Bands that lack a 100 MHz field entry in channelBWs (3GPP TS 38.306 v16.6.0 §4.2.7.6)
 const BANDS_DEFAULT_100 = new Set([41, 48, 77, 78, 79, 90]);
 
+// Supplementary-uplink NR bands (upstream DuplexBandTable.nrData → Duplex.SUL).
+// SUL bands carry no downlink: omit modulationDl (and DL bandwidths) — duplex==SUL ⇒ modDL=NONE.
+const NR_SUL_BANDS = new Set([80, 81, 82, 83, 84, 86, 89, 95, 97, 98, 99]);
+
 // BwsBitMap: FR1 bandwidth mapping table (index → MHz)
 // Index i in the 10-char bit string corresponds to fr1BwMap[i]
 const FR1_BW_MAP = [5, 10, 15, 20, 25, 30, 40, 50, 60, 80];
@@ -430,9 +434,9 @@ export function getNrBands(nr: Record<string, unknown>): BandNrDetails[] {
     if (band === undefined) continue;
 
     const fr2 = isFR2(band);
+    const isSul = NR_SUL_BANDS.has(band);
 
     // Determine DL modulation
-    // SUL bands: no oracle fixture, skip SUL check for now (SDL/SUL classification not in scope)
     // qam1024: FR1 only, pdsch-1024QAM-FR1-r17
     const qam1024Dl = !fr2 && getString(item, 'pdsch-1024QAM-FR1-r17') !== undefined;
     // qam256: FR1 uses global phyParamsFr1 flag; FR2 uses per-band pdsch-256QAM-FR2
@@ -504,7 +508,7 @@ export function getNrBands(nr: Record<string, unknown>): BandNrDetails[] {
     );
 
     const bandDetails: BandNrDetails = { band };
-    bandDetails.modulationDl = modDL;
+    if (!isSul) bandDetails.modulationDl = modDL;
     if (modUL) bandDetails.modulationUl = modUL;
     if (powerClass !== undefined && powerClass !== PC_NONE) bandDetails.powerClass = powerClass;
     if (maxUplinkDutyCycle !== undefined && maxUplinkDutyCycle !== 0) {

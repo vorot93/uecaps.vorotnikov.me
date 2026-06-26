@@ -24,6 +24,7 @@ import {
   getArrayAtPath,
 } from '../json';
 import { nceChain } from './versions';
+import { compareBwClassDesc } from './component-sort';
 
 // ---------------------------------------------------------------------------
 // Versioned-extension resolution helpers
@@ -539,18 +540,6 @@ function hasHighMimo(combinations: MutableComponent[][]): boolean {
 // ---------------------------------------------------------------------------
 // mergeBcs — zip combinations with bcs list → ComboLte[]
 // ---------------------------------------------------------------------------
-
-/**
- * Compare two bwClass letters descending (undefined sorts lowest).
- * Returns positive if a > b (a should come first in descending sort).
- */
-function compareBwClassDesc(a: string | undefined, b: string | undefined): number {
-  if (a === b) return 0;
-  if (a === undefined) return -1; // a sorts after b (lower)
-  if (b === undefined) return 1;  // b sorts after a (lower)
-  // Letter comparison: higher letter = higher class
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * Port of ComponentLte.compareTo — DESCENDING compareValuesBy(band, bwClassDl,
