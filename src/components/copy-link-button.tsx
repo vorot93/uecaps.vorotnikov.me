@@ -5,7 +5,7 @@ export default component$(() => {
   return (
     <button
       type="button"
-      class="rounded border border-gray-400 px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="rounded border border-gray-400 px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:hover:bg-gray-800"
       onClick$={async () => {
         // navigator.clipboard + location are browser-only — onClick$ runs only
         // in the browser, never during prerender.

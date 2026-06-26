@@ -91,7 +91,7 @@ export default component$(() => {
         {globalError.value && (
           <div
             role="alert"
-            class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+            class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
           >
             {globalError.value}
           </div>
@@ -100,7 +100,7 @@ export default component$(() => {
         <div class="flex gap-3">
           <button
             type="button"
-            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100"
+            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
             onClick$={() => {
               store.captures = [...store.captures, { name: "", text: "" }];
             }}
@@ -109,7 +109,7 @@ export default component$(() => {
           </button>
           <button
             type="button"
-            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100"
+            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
             onClick$={onLoadExample}
           >
             Load example

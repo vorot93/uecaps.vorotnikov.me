@@ -95,6 +95,15 @@ describe('MultiCapabilityView render smoke test', () => {
     await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
     expect(screen.outerHTML).toContain('Download CSV');
   });
+
+  it('wraps the results in a persistent-light data card (bg-white + text-gray-900)', async () => {
+    const caps = interpret(nsgTextToCanonical(readFixtureText('nsgNr.input.txt')));
+    const { screen, render } = await createDOM();
+    await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
+    // The data area must NOT darken in dark mode — it carries an explicit light
+    // surface with no `dark:` variant, so the 513 band colors stay readable.
+    expect(screen.outerHTML).toContain('bg-white p-4 text-gray-900');
+  });
 });
 
 describe('MultiCapabilityView labels prop', () => {

@@ -11,4 +11,12 @@ describe('EmptyState', () => {
     expect(html).toContain('Load example');
     expect(html).toContain('ueCapabilityInformation');
   });
+
+  it('emits dark: variants for dark mode', async () => {
+    const { screen, render } = await createDOM();
+    await render(h(EmptyState, { onLoadExample$: $(() => {}) }));
+    // Tailwind keeps `dark:` as a literal class token, so its presence proves
+    // the chrome sweep applied dark-mode variants.
+    expect(screen.outerHTML).toContain('dark:');
+  });
 });

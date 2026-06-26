@@ -7,8 +7,8 @@ interface Props {
 
 export default component$(({ onLoadExample$ }: Props) => {
   return (
-    <div class="mb-6 rounded border border-gray-200 bg-gray-50 px-4 py-4">
-      <p class="mb-3 text-sm text-gray-700">
+    <div class="mb-6 rounded border border-gray-200 bg-gray-50 px-4 py-4 dark:border-gray-700 dark:bg-gray-800">
+      <p class="mb-3 text-sm text-gray-700 dark:text-gray-300">
         Paste an NSG <code class="font-mono">ueCapabilityInformation</code> log to decode its LTE/NR
         bands and carrier-aggregation combos — everything runs in your browser; nothing is uploaded.
         New here? Try it with a sample:

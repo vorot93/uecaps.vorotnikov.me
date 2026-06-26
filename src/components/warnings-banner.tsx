@@ -8,7 +8,7 @@ export default component$(({ warnings }: { warnings?: string[] }) => {
   return (
     <div
       role="status"
-      class="mb-4 rounded border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800"
+      class="mb-4 rounded border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200"
     >
       <ul class="list-disc pl-5">
         {warnings.map((w) => (

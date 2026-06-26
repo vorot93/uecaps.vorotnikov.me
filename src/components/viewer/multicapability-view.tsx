@@ -57,7 +57,7 @@ export default component$(({ capabilitiesList, groupDescription, labels }: Props
   const caps = currentCapabilities.value;
 
   return (
-    <>
+    <div class="rounded-lg border border-gray-200 bg-white p-4 text-gray-900">
       <div class="mb-4 flex flex-col">
         <div class="mx-auto flex w-full max-w-7xl items-end gap-4">
           <div class={'flex-1 ' + (capabilitiesSelector.length < 2 ? 'hidden' : '')}>
@@ -81,6 +81,6 @@ export default component$(({ capabilitiesList, groupDescription, labels }: Props
         </div>
       </div>
       {caps != null && <CapabilityView capabilities={caps} />}
-    </>
+    </div>
   );
 });
