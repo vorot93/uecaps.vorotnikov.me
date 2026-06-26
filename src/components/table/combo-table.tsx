@@ -15,6 +15,7 @@ interface Props {
   pagination?: boolean;
   coloredBands?: boolean;
   noSearch?: boolean;
+  defaultOpen?: boolean;
 }
 
 export default component$((props: Props) => {
@@ -170,7 +171,7 @@ export default component$((props: Props) => {
     return table;
   } else {
     return (
-      <details open={false}>
+      <details open={props.defaultOpen ?? false}>
         <summary class="mt-10 text-xl font-bold">{title}</summary>
         {table}
       </details>

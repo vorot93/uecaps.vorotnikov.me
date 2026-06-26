@@ -27,7 +27,7 @@ export default component$(({ cap, title }: Props) => {
   }
 
   return (
-    <details open={false}>
+    <details open={true}>
       <summary class="mt-10 text-xl font-bold">{title}</summary>
 
       {ratCapabilities.map((ratCapability, index) => (

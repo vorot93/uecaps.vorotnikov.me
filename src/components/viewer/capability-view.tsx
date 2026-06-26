@@ -4,7 +4,7 @@
  * CSV export is deferred to Phase 2.
  * All rendering is pure client-side from the Capabilities object.
  */
-import { component$ } from '@builder.io/qwik';
+import { component$, useSignal } from '@builder.io/qwik';
 import LteBands from '~/components/table/lte-bands';
 import NrBands from '~/components/table/nr-bands';
 import Lteca from '~/components/table/lteca';
@@ -15,15 +15,20 @@ import { type Capabilities } from '~/parser/types/uecapabilityparser';
 import Filters from '~/components/table/filters';
 import MetadataTable from '~/components/table/metadata-table';
 import Ratcapabilities from '~/components/table/ratcapabilities';
+import ExpandCollapseAll from '~/components/table/expand-collapse-all';
 
 interface Props {
   capabilities: Capabilities;
 }
 
 export default component$(({ capabilities }: Props) => {
+  const sectionsRef = useSignal<HTMLElement>();
   return (
     <>
-      <div class={'flex flex-1 flex-col'}>
+      <div class={'flex flex-1 flex-col'} ref={sectionsRef}>
+        <div class="mx-auto w-full max-w-7xl">
+          <ExpandCollapseAll target={sectionsRef} />
+        </div>
         <div class="mx-auto w-full max-w-7xl overflow-x-auto">
           <div class="w-full text-sm sm:w-fit sm:min-w-[32rem] sm:max-w-full md:min-w-[36rem]">
             <MetadataTable cap={capabilities ?? undefined} title="Metadata" />

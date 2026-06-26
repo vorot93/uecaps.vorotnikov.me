@@ -53,6 +53,6 @@ export default component$(({ bands, title }: Props) => {
   });
 
   return (
-    <ComboTable title={title} hideEmpty={true} headers={headers} data={data} />
+    <ComboTable title={title} hideEmpty={true} headers={headers} data={data} defaultOpen={true} />
   );
 });
