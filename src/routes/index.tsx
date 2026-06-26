@@ -1,9 +1,11 @@
-import { component$, useSignal, useStore, useVisibleTask$ } from "@builder.io/qwik";
+import { $, component$, useSignal, useStore, useVisibleTask$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { collectCaptures, type Capture, type MultiParse } from "~/lib/multi-capture";
 import { loadCapturesFromFragment, writeFragmentCaptures } from "~/lib/fragment-state";
 import MultiCapabilityView from "~/components/viewer/multicapability-view";
 import CaptureCard from "~/components/capture-card";
+import EmptyState from "~/components/empty-state";
+import CopyLinkButton from "~/components/copy-link-button";
 
 export default component$(() => {
   const store = useStore<{ captures: Capture[] }>({
@@ -40,9 +42,29 @@ export default component$(() => {
     }
   });
 
+  const runParse = $(async () => {
+    const r = collectCaptures(store.captures);
+    result.value = r;
+    globalError.value = r.allBlank
+      ? "Paste NSG UE-capability text to begin."
+      : undefined;
+    // writeFragmentCaptures uses history.replaceState — client-only; safe here
+    // because this QRL only runs from an onClick$ in the browser.
+    if (!r.allBlank) {
+      await writeFragmentCaptures(store.captures);
+    }
+  });
+
+  const onLoadExample = $(async () => {
+    const { EXAMPLE_NSG, EXAMPLE_LABEL } = await import("~/lib/example-capture");
+    store.captures = [{ name: EXAMPLE_LABEL, text: EXAMPLE_NSG }];
+    await runParse();
+  });
+
   return (
     <main class="mx-auto max-w-7xl px-4 py-8">
       <h1 class="mb-6 text-2xl font-bold">NSG UE-Capability Viewer</h1>
+      {result.value === undefined && <EmptyState onLoadExample$={onLoadExample} />}
 
       <section aria-label="Paste and parse NSG capability text">
         {store.captures.map((capture, index) => (
@@ -87,20 +109,15 @@ export default component$(() => {
           </button>
           <button
             type="button"
+            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100"
+            onClick$={onLoadExample}
+          >
+            Load example
+          </button>
+          <button
+            type="button"
             class="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick$={async () => {
-              const r = collectCaptures(store.captures);
-              result.value = r;
-              globalError.value = r.allBlank
-                ? "Paste NSG UE-capability text to begin."
-                : undefined;
-              // Update the URL fragment so this page state is shareable.
-              // writeFragmentCaptures uses history.replaceState — client-only;
-              // safe here because onClick$ always runs in the browser.
-              if (!r.allBlank) {
-                await writeFragmentCaptures(store.captures);
-              }
-            }}
+            onClick$={runParse}
           >
             Parse
           </button>
@@ -109,6 +126,9 @@ export default component$(() => {
 
       {result.value && result.value.devices.length > 0 && (
         <section aria-label="Parsed capability results" class="mt-8">
+          <div class="mb-4 flex">
+            <CopyLinkButton />
+          </div>
           <MultiCapabilityView
             capabilitiesList={result.value.devices}
             labels={result.value.labels}
