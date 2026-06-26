@@ -1,4 +1,5 @@
 import { parseFragment, decodeState, encodeState, toFragment } from '~/codec';
+import type { Capture } from '~/lib/multi-capture';
 
 /**
  * Load the original NSG text from a URL hash fragment.
@@ -65,4 +66,63 @@ export async function loadFromFragmentWithError(hash: string): Promise<FragmentR
 export async function writeFragment(text: string): Promise<void> {
   const payload = await encodeState(text);
   history.replaceState(null, '', toFragment(payload));
+}
+
+/** Narrow an unknown decoded value to the captures-array shape. */
+function isCaptureArray(value: unknown): value is Capture[] {
+  return (
+    Array.isArray(value) &&
+    value.every((e) => {
+      const o = e as Record<string, unknown> | null;
+      return o != null && typeof o.text === 'string' && typeof o.name === 'string';
+    })
+  );
+}
+
+/**
+ * Encode the capture array as one string through the existing codec and update
+ * the URL fragment via `history.replaceState`. Client-only (browser global
+ * `history`) — call from `onClick$`/`useVisibleTask$`, never during prerender.
+ */
+export async function writeFragmentCaptures(captures: Capture[]): Promise<void> {
+  const payload = await encodeState(JSON.stringify(captures));
+  history.replaceState(null, '', toFragment(payload));
+}
+
+export interface CapturesFragmentResult {
+  /** decoded captures, or null when there is no fragment / it is corrupt */
+  captures: Capture[] | null;
+  /** non-null only when a present fragment failed to decode */
+  decodeError: string | null;
+}
+
+/**
+ * Decode the URL fragment into capture cards. A legacy single-blob link (raw
+ * NSG text, not JSON) decodes as one unnamed capture, so old share links keep
+ * working. Safe to call in Node/SSR with an empty string.
+ */
+export async function loadCapturesFromFragment(hash: string): Promise<CapturesFragmentResult> {
+  const payload = parseFragment(hash);
+  if (!payload) {
+    return { captures: null, decodeError: null };
+  }
+  let decoded: string;
+  try {
+    decoded = await decodeState(payload);
+  } catch {
+    return { captures: null, decodeError: 'This share link is corrupted or unsupported.' };
+  }
+  try {
+    const value: unknown = JSON.parse(decoded);
+    if (isCaptureArray(value)) {
+      // Normalize to exactly { name, text } (drop any extra keys).
+      return {
+        captures: value.map((e) => ({ name: e.name, text: e.text })),
+        decodeError: null,
+      };
+    }
+  } catch {
+    // Not JSON → legacy raw NSG text. Fall through to the single-capture wrap.
+  }
+  return { captures: [{ name: '', text: decoded }], decodeError: null };
 }

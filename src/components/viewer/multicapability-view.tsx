@@ -16,9 +16,10 @@ import { downloadCsv } from '~/lib/download';
 interface Props {
   capabilitiesList: Capabilities[];
   groupDescription?: string;
+  labels?: string[];
 }
 
-export default component$(({ capabilitiesList, groupDescription }: Props) => {
+export default component$(({ capabilitiesList, groupDescription, labels }: Props) => {
   const currentIndex = useSignal(0);
   const currentCapabilities = useComputed$(
     () => capabilitiesList?.[currentIndex.value],
@@ -37,11 +38,13 @@ export default component$(({ capabilitiesList, groupDescription }: Props) => {
 
   capabilitiesList?.forEach((value, index) => {
     capabilitiesSelector.push({
-      label: descriptionsAlldifferent
-        ? (value.metadata.description ?? String(index))
-        : typesAlldifferent
-          ? logTypeToString(value.logType)
-          : (value.id ?? String(index)),
+      label: labels
+        ? (labels[index] ?? String(index))
+        : descriptionsAlldifferent
+          ? (value.metadata.description ?? String(index))
+          : typesAlldifferent
+            ? logTypeToString(value.logType)
+            : (value.id ?? String(index)),
       value: String(index),
     });
   });

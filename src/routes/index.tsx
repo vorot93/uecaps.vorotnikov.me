@@ -1,42 +1,42 @@
-import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, useStore, useVisibleTask$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import type { Capabilities } from "~/parser/types/uecapabilityparser";
-import { parseInput } from "~/lib/parse-input";
-import { loadFromFragmentWithError, writeFragment } from "~/lib/fragment-state";
+import { collectCaptures, type Capture, type MultiParse } from "~/lib/multi-capture";
+import { loadCapturesFromFragment, writeFragmentCaptures } from "~/lib/fragment-state";
 import MultiCapabilityView from "~/components/viewer/multicapability-view";
-import WarningsBanner from "~/components/warnings-banner";
+import CaptureCard from "~/components/capture-card";
 
 export default component$(() => {
-  const text = useSignal("");
-  const results = useSignal<Capabilities[]>([]);
-  const error = useSignal<string | undefined>(undefined);
-  const warnings = useSignal<string[]>([]);
+  const store = useStore<{ captures: Capture[] }>({
+    captures: [{ name: "", text: "" }],
+  });
+  const result = useSignal<MultiParse | undefined>(undefined);
+  const globalError = useSignal<string | undefined>(undefined);
 
-  // On client load: read the URL fragment and prefill the textarea + parse.
-  // useVisibleTask$ runs ONLY in the browser — never during static prerender,
+  // On client load: read the URL fragment, prefill the cards, and parse.
+  // useVisibleTask$ runs ONLY in the browser — never during static prerender —
   // so it is safe to access `location.hash` here.
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async () => {
-    const { text: loaded, decodeError } = await loadFromFragmentWithError(location.hash);
-
+    const { captures, decodeError } = await loadCapturesFromFragment(location.hash);
     if (decodeError) {
-      // Bad fragment — surface a distinct message; textarea stays empty and editable.
-      error.value = decodeError;
+      globalError.value = decodeError;
       return;
     }
-
-    if (loaded) {
-      // Only prefill if the user hasn't typed anything yet — a slow hydration
-      // must not clobber input the user already entered.
-      if (!text.value) {
-        text.value = loaded;
+    if (captures) {
+      // Only adopt shared captures if the user hasn't typed yet — the pristine
+      // initial state is exactly one card with empty name and text. This is the
+      // multi-card analog of the old `!text.value` guard.
+      const pristine =
+        store.captures.length === 1 &&
+        store.captures[0]!.name === "" &&
+        store.captures[0]!.text === "";
+      if (pristine && captures.length > 0) {
+        // Only auto-parse when we actually adopt a shared link — so a fragment
+        // load during a slow-hydration race never prematurely parses (or shows
+        // a parse error for) input the user is mid-typing.
+        store.captures = captures;
+        result.value = collectCaptures(store.captures);
       }
-      const parsed = parseInput(loaded);
-      results.value = parsed.caps;
-      // For a successfully decoded fragment we show parse errors if any,
-      // but the textarea is already prefilled so the user can edit and retry.
-      error.value = parsed.error;
-      warnings.value = parsed.warnings ?? [];
     }
   });
 
@@ -45,53 +45,74 @@ export default component$(() => {
       <h1 class="mb-6 text-2xl font-bold">NSG UE-Capability Viewer</h1>
 
       <section aria-label="Paste and parse NSG capability text">
-        <label for="nsg-input" class="mb-2 block font-medium">
-          Paste NSG UE-capability text
-        </label>
-        <textarea
-          id="nsg-input"
-          class="mb-4 h-48 w-full rounded border border-gray-300 p-2 font-mono text-sm"
-          placeholder="Paste NSG UE-capability log here…"
-          value={text.value}
-          onInput$={(e) => {
-            text.value = (e.target as HTMLTextAreaElement).value;
-          }}
-        />
+        {store.captures.map((capture, index) => (
+          <CaptureCard
+            key={index}
+            index={index}
+            name={capture.name}
+            text={capture.text}
+            error={result.value?.cards[index]?.error}
+            warnings={result.value?.cards[index]?.warnings}
+            canRemove={store.captures.length > 1}
+            onNameChange$={(value) => {
+              store.captures[index]!.name = value;
+            }}
+            onTextChange$={(value) => {
+              store.captures[index]!.text = value;
+            }}
+            onRemove$={() => {
+              store.captures = store.captures.filter((_, i) => i !== index);
+            }}
+          />
+        ))}
 
-        {error.value && (
+        {globalError.value && (
           <div
             role="alert"
             class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
           >
-            {error.value}
+            {globalError.value}
           </div>
         )}
 
-        <WarningsBanner warnings={warnings.value} />
-
-        <button
-          type="button"
-          class="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick$={async () => {
-            const parsed = parseInput(text.value);
-            results.value = parsed.caps;
-            error.value = parsed.error;
-            warnings.value = parsed.warnings ?? [];
-            // Update the URL fragment so this page state is shareable.
-            // writeFragment uses history.replaceState — client-only; safe here
-            // because onClick$ always runs in the browser.
-            if (text.value.trim()) {
-              await writeFragment(text.value);
-            }
-          }}
-        >
-          Parse
-        </button>
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100"
+            onClick$={() => {
+              store.captures = [...store.captures, { name: "", text: "" }];
+            }}
+          >
+            + Add capture
+          </button>
+          <button
+            type="button"
+            class="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick$={async () => {
+              const r = collectCaptures(store.captures);
+              result.value = r;
+              globalError.value = r.allBlank
+                ? "Paste NSG UE-capability text to begin."
+                : undefined;
+              // Update the URL fragment so this page state is shareable.
+              // writeFragmentCaptures uses history.replaceState — client-only;
+              // safe here because onClick$ always runs in the browser.
+              if (!r.allBlank) {
+                await writeFragmentCaptures(store.captures);
+              }
+            }}
+          >
+            Parse
+          </button>
+        </div>
       </section>
 
-      {results.value.length > 0 && (
+      {result.value && result.value.devices.length > 0 && (
         <section aria-label="Parsed capability results" class="mt-8">
-          <MultiCapabilityView capabilitiesList={results.value} />
+          <MultiCapabilityView
+            capabilitiesList={result.value.devices}
+            labels={result.value.labels}
+          />
         </section>
       )}
     </main>

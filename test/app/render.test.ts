@@ -97,6 +97,23 @@ describe('MultiCapabilityView render smoke test', () => {
   });
 });
 
+describe('MultiCapabilityView labels prop', () => {
+  it('uses the labels prop as the Select log options when provided', async () => {
+    const caps = interpret(nsgTextToCanonical(readFixtureText('nsgNr.input.txt')));
+    const { screen, render } = await createDOM();
+    await render(
+      h(MultiCapabilityView, {
+        capabilitiesList: [caps, caps],
+        labels: ['Pixel 8', 'Galaxy S24'],
+      }),
+    );
+    const html = screen.outerHTML;
+    expect(html).toContain('Select log');
+    expect(html).toContain('Pixel 8');
+    expect(html).toContain('Galaxy S24');
+  });
+});
+
 describe('WarningsBanner component', () => {
   it('renders a yellow role="status" banner listing the warnings', async () => {
     const { screen, render } = await createDOM();
