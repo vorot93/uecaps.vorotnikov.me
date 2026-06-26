@@ -64,8 +64,8 @@ export default component$(() => {
 
   return (
     <main class="mx-auto max-w-7xl px-4 py-8">
-      <div class="mb-6 flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold">NSG UE-Capability Viewer</h1>
+      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 class="text-xl font-bold sm:text-2xl">NSG UE-Capability Viewer</h1>
         <ThemeToggle />
       </div>
       {result.value === undefined && <EmptyState onLoadExample$={onLoadExample} />}
@@ -101,7 +101,7 @@ export default component$(() => {
           </div>
         )}
 
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
           <button
             type="button"
             class="rounded border border-gray-400 px-4 py-2 font-semibold hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"

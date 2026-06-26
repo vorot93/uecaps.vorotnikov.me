@@ -104,6 +104,15 @@ describe('MultiCapabilityView render smoke test', () => {
     // surface with no `dark:` variant, so the 513 band colors stay readable.
     expect(screen.outerHTML).toContain('bg-white p-4 text-gray-900');
   });
+
+  it('the selector row carries flex-wrap for mobile wrapping', async () => {
+    const caps = interpret(nsgTextToCanonical(readFixtureText('nsgNr.input.txt')));
+    const { screen, render } = await createDOM();
+    await render(h(MultiCapabilityView, { capabilitiesList: [caps] }));
+    // Specific to the selector+CSV row (a bare `flex-wrap` already exists in the
+    // combo-table controls row, so match the row's exact class neighborhood).
+    expect(screen.outerHTML).toContain('max-w-7xl flex-wrap items-end');
+  });
 });
 
 describe('MultiCapabilityView labels prop', () => {
