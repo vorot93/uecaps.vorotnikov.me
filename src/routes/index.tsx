@@ -6,6 +6,7 @@ import MultiCapabilityView from "~/components/viewer/multicapability-view";
 import CaptureCard from "~/components/capture-card";
 import EmptyState from "~/components/empty-state";
 import CopyLinkButton from "~/components/copy-link-button";
+import ThemeToggle from "~/components/theme-toggle";
 
 export default component$(() => {
   const store = useStore<{ captures: Capture[] }>({
@@ -63,7 +64,10 @@ export default component$(() => {
 
   return (
     <main class="mx-auto max-w-7xl px-4 py-8">
-      <h1 class="mb-6 text-2xl font-bold">NSG UE-Capability Viewer</h1>
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <h1 class="text-2xl font-bold">NSG UE-Capability Viewer</h1>
+        <ThemeToggle />
+      </div>
       {result.value === undefined && <EmptyState onLoadExample$={onLoadExample} />}
 
       <section aria-label="Paste and parse NSG capability text">

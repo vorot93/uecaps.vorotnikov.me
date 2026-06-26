@@ -1,6 +1,7 @@
 import { component$, isDev } from "@builder.io/qwik";
 import { QwikCityProvider, RouterOutlet } from "@builder.io/qwik-city";
 import { RouterHead } from "./components/router-head/router-head";
+import { THEME_INIT } from "./lib/theme";
 
 import "./global.css";
 
@@ -9,6 +10,7 @@ export default component$(() => {
     <QwikCityProvider>
       <head>
         <meta charset="utf-8" />
+        <script dangerouslySetInnerHTML={THEME_INIT} />
         {!isDev && (
           <link
             rel="manifest"
